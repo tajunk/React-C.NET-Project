@@ -6,9 +6,10 @@ import { getUnansweredQuestions, QuestionData } from './QuestionsData';
 import { Page } from './Page';
 import { PageTitle } from './PageTitle';
 import { Question } from './Question';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, FC } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 
-export const HomePage = () => {
+export const HomePage: FC<RouteComponentProps> = ({ history }) => {
   const [questions, setQuestions] = useState<QuestionData[] | null>(null);
   const [questionsLoading, setQuestionsLoading] = useState(true);
 
@@ -22,7 +23,7 @@ export const HomePage = () => {
   }, []);
 
   const handleAskQuestionClick = () => {
-    console.log('TODO - move to the AskPage');
+    history.push('/ask');
   };
 
   return (
@@ -40,7 +41,14 @@ export const HomePage = () => {
         </PrimaryButton>
       </div>
       {questionsLoading ? (
-        <div css={css``}>Loading...</div>
+        <div
+          css={css`
+            font-size: 16px;
+            font-style: italic;
+          `}
+        >
+          Loading...
+        </div>
       ) : (
         <QuestionList data={questions || []} />
       )}
