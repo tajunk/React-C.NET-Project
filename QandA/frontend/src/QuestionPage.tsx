@@ -5,6 +5,7 @@ import { FC, useState, Fragment, useEffect } from 'react';
 import { Page } from './Page';
 import { RouteComponentProps } from 'react-router-dom';
 import { QuestionData, getQuestion } from './QuestionsData';
+import { AnswerList } from './AnswerList';
 
 interface RouteParams {
   questionId: string;
@@ -67,6 +68,7 @@ export const QuestionPage: FC<RouteComponentProps<RouteParams>> = ({
             ${question.created.toLocaleDateString()}
             ${question.created.toLocaleTimeString()}`}
             </div>
+            <AnswerList data={question.answers} />
           </Fragment>
         )}
       </div>
