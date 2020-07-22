@@ -30,17 +30,32 @@ const baseCSS = css`
 `;
 
 export const Field: FC<Props> = ({ name, label, type = 'Text' }) => {
-  const { setValue } = useContext(FormContext);
+  const { setValue, touched, setTouched, validate } = useContext(FormContext);
   const handleChange = (
     e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>,
   ) => {
     if (setValue) {
       setValue(name, e.currentTarget.value);
     }
+    // Only invoke validation if the field has been touched
+    if (touched[name]) {
+      if (validate) {
+        validate(name);
+      }
+    }
+  };
+  // This handdler for the blur event tells the Form component when a Field has been touched
+  const handleBlur = () => {
+    if (setTouched) {
+      setTouched(name);
+    }
+    if (validate) {
+      validate(name);
+    }
   };
   return (
     <FormContext.Consumer>
-      {({ values }) => (
+      {({ values, errors }) => (
         <div
           css={css`
             display: flex;
@@ -64,6 +79,7 @@ export const Field: FC<Props> = ({ name, label, type = 'Text' }) => {
               id={name}
               value={values[name] === undefined ? '' : values[name]}
               onChange={handleChange}
+              onBlur={handleBlur}
               css={baseCSS}
             />
           )}
@@ -72,12 +88,27 @@ export const Field: FC<Props> = ({ name, label, type = 'Text' }) => {
               id={name}
               value={values[name] === undefined ? '' : values[name]}
               onChange={handleChange}
+              onBlur={handleBlur}
               css={css`
                 ${baseCSS};
                 height: 100px;
               `}
             />
           )}
+          {/* We use the map function to iterate through all of the errors and render each one in a div element */}
+          {errors[name] &&
+            errors[name].length > 0 &&
+            errors[name].map((error) => (
+              <div
+                key={error}
+                css={css`
+                  font-size: 12px;
+                  color: red;
+                `}
+              >
+                {error}
+              </div>
+            ))}
         </div>
       )}
     </FormContext.Consumer>
