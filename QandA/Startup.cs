@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using DbUp;
 
 namespace QandA
 {
@@ -25,6 +26,26 @@ namespace QandA
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Gets the database connection from the appsettings.json and creates the database if it doesn't exist
+            var connectionString =
+            Configuration.GetConnectionString("DefaultConnection");
+            EnsureDatabase.For.SqlDatabase(connectionString);
+
+            // Create/Configure DbUp, telling DbUp where the database is, to look for SQL Scripts in our project, and to do the database migrations in a transcript
+            var upgrader = DeployChanges.To
+            .SqlDatabase(connectionString, null)
+            .WithScriptsEmbeddedInAssembly(
+            System.Reflection.Assembly.GetExecutingAssembly()
+            )
+            .WithTransaction()
+            .Build();
+
+            // Gets DbUp to do a database migration if there are any pending SQL scripts.
+            if (upgrader.IsUpgradeRequired())
+            {
+                upgrader.PerformUpgrade();
+            }
+
             services.AddControllers();
         }
 
