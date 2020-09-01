@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using QandA.Data;
 using QandA.Data.Models;
+using Microsoft.AspNetCore.SignalR;
+using QandA.Hubs;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -15,18 +17,27 @@ namespace QandA.Controllers
     public class QuestionsController : ControllerBase
     {
         private readonly IDataRepository _dataRepository;
+        private readonly IHubContext<QuestionsHub> _questionHubContext;
 
-        public QuestionsController(IDataRepository dataRepository)
+        public QuestionsController(IDataRepository dataRepository, IHubContext<QuestionsHub> questionHubContext)
         {
             _dataRepository = dataRepository;
+            _questionHubContext = questionHubContext;
         }
 
         [HttpGet]
-        public IEnumerable<QuestionGetManyResponse> GetQuestions(string search)
+        public IEnumerable<QuestionGetManyResponse> GetQuestions(string search, bool includeAnswers)
         {
             if (string.IsNullOrEmpty(search))
             {
-                return _dataRepository.GetQuestions();
+                if (includeAnswers)
+                {
+                    return _dataRepository.GetQuestionsWithAnswers();
+                }
+                else
+                {
+                    return _dataRepository.GetQuestions();
+                }
             }
             else
             {
@@ -125,6 +136,13 @@ namespace QandA.Controllers
                         Created = DateTime.UtcNow
                     }
                 );
+            // ** The following uses SignalR to make our API controller push updated questions to subscribed clients **
+            _questionHubContext.Clients.Group(
+                $"Question-{answerPostRequest.QuestionId.Value}")
+                    .SendAsync(
+                        "ReceiveQuestion",
+                        _dataRepository.GetQuestion(
+                            answerPostRequest.QuestionId.Value));
             return savedAnswer;
         }
     }
