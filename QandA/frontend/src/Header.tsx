@@ -4,10 +4,12 @@ import { fontFamily, fontSize, gray1, gray2, gray5 } from './Styles';
 import { UserIcon } from './Icons';
 import { ChangeEvent, FC, useState, FormEvent } from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
+import { useAuth } from './Auth';
 
 export const Header: FC<RouteComponentProps> = ({ history, location }) => {
   const searchParams = new URLSearchParams(location.search);
   const criteria = searchParams.get('criteria') || '';
+  const { isAuthenticated, user, loading } = useAuth();
 
   // Get criteria value from deconstructing search object above and then use search in the input HTML tag
   // State is created to store the search value in, defaulting it to the criteria variable from above
@@ -72,27 +74,57 @@ export const Header: FC<RouteComponentProps> = ({ history, location }) => {
           `}
         />
       </form>
-      <Link
-        to="/signin"
-        css={css`
-          font-family: ${fontFamily};
-          font-size: ${fontSize};
-          padding: 5px 10px;
-          background-color: transparent;
-          color: ${gray2};
-          text-decoration: none;
-          cursor: pointer;
-          span {
-            margin-left: 10px;
-          }
-          :focus {
-            outline-color: ${gray5};
-          }
-        `}
-      >
-        <UserIcon />
-        <span>Sign In</span>
-      </Link>
+      <div>
+        {!loading &&
+          (isAuthenticated ? (
+            <div>
+              <span>{user!.name}</span>
+              <Link
+                to={{ pathname: '/signout', state: { local: true } }}
+                css={css`
+                  font-family: ${fontFamily};
+                  font-size: ${fontSize};
+                  padding: 5px 10px;
+                  background-color: transparent;
+                  color: ${gray2};
+                  text-decoration: none;
+                  cursor: pointer;
+                  span {
+                    margin-left: 10px;
+                  }
+                  :focus {
+                    outline-color: ${gray5};
+                  }
+                `}
+              >
+                <UserIcon />
+                <span>Sign Out</span>
+              </Link>
+            </div>
+          ) : (
+            <Link
+              to="/signin"
+              css={css`
+                font-family: ${fontFamily};
+                font-size: ${fontSize};
+                padding: 5px 10px;
+                background-color: transparent;
+                color: ${gray2};
+                text-decoration: none;
+                cursor: pointer;
+                span {
+                  margin-left: 10px;
+                }
+                :focus {
+                  outline-color: ${gray5};
+                }
+              `}
+            >
+              <UserIcon />
+              <span>Sign In</span>
+            </Link>
+          ))}
+      </div>
     </div>
   );
 };
