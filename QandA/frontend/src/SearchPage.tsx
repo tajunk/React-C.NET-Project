@@ -16,11 +16,17 @@ export const SearchPage: FC<RouteComponentProps> = ({ location }) => {
 
   // Invoke the search when this component first renders and when the search variable changes
   useEffect(() => {
+    let cancelled = false;
     const doSearch = async (criteria: string) => {
       const foundResults = await searchQuestions(criteria);
-      setQuestions(foundResults);
+      if (!cancelled) {
+        setQuestions(foundResults);
+      }
     };
     doSearch(search);
+    return () => {
+      cancelled = true;
+    };
   }, [search]);
 
   return (

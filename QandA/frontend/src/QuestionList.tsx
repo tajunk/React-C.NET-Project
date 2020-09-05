@@ -4,7 +4,6 @@ import { FC } from 'react';
 import { gray5, accent2 } from './Styles';
 import { QuestionData } from './QuestionsData';
 import { Question } from './Question';
-import { render } from '@testing-library/react';
 
 interface Props {
   data: QuestionData[];
