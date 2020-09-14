@@ -58,9 +58,10 @@ namespace QandA
             services.AddCors(options =>
                 options.AddPolicy("CorsPolicy", builder =>
                     builder.AllowAnyMethod()
+                        .AllowAnyMethod()
                         .AllowAnyHeader()
-                        .WithOrigins("http://localhost:3000")
-                        .AllowCredentials()));
+                        .AllowCredentials()
+                        .WithOrigins(Configuration["Frontend"])));
             services.AddMemoryCache();
             services.AddSingleton<IQuestionCache, QuestionCache>();
 

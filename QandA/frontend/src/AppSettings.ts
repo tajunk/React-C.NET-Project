@@ -1,4 +1,9 @@
-export const server = 'http://localhost:52823';
+export const server =
+  process.env.REACT_APP_ENV === 'production'
+    ? 'https://qa-backend.azurewebsites.net'
+    : process.env.REACT_APP_ENV === 'staging'
+    ? 'https://qa-backend-staging.azurewebsites.net'
+    : 'http://localhost:52823';
 
 export const webAPIUrl = `${server}/api`;
 
